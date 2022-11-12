@@ -25,14 +25,14 @@ public class KafkaController {
 
         MappedPackage myPackage = new MappedPackage(packageId,"test","test",0,0,0,0,true);
 
-        this.producer.sendMessage("kamil isler package id : "+packageId);
+        this.producer.sendMessage(myPackage);
 
         return "Single package is sent. sent package id : " + packageId;
     }
     //TODO: sistemdeki MappedPackage'ların hepsini kafkaya gönder
     @GetMapping("/bootstrap")
     public String sendAllPackagesToKafka() {
-        this.producer.sendMessage("");
+        // this.producer.sendMessage("");
         return "All packages sent to kafka." ;
     }
 
