@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +31,15 @@ public class PreparePackageService {
         }
         return null;
          */
+    }
+    public List<MappedPackage> getAllPackages(){
+
+        List<Package> allPackages = packageRepository.findAll();
+        List<MappedPackage> mappedPackages = new ArrayList<>();
+        for (Package thePackage : allPackages) {
+            mappedPackages.add(processPackage(thePackage));
+        }
+        return mappedPackages;
     }
 
 

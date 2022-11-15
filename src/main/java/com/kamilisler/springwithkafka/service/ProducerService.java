@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
     public class ProducerService {
 
         @Autowired
-        private KafkaTemplate<String, MappedPackage> kafkaTemplate;
+        private KafkaTemplate<String, Object> kafkaTemplate;
 
         @Value("${spring.kafka.producer.topic}")
         private String topicName;
 
-        public void sendMessage(MappedPackage thePackage) {
+        public void sendMessage(Object thePackage) {
             kafkaTemplate.send(topicName, thePackage);
             // template batch yollama araştır.
         }

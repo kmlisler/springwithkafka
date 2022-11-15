@@ -6,6 +6,7 @@ import com.kamilisler.springwithkafka.service.ProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,11 +33,11 @@ public class KafkaController {
 
 
     }
-    //TODO: sistemdeki MappedPackage'ların hepsini kafkaya gönder
     @GetMapping("/bootstrap")
     public String sendAllPackagesToKafka() {
         // this.producer.sendMessage("");
-
+        List<MappedPackage> list = preparePackageService.getAllPackages();
+        this.producer.sendMessage(list);
         return "All packages sent to kafka." ;
     }
 
