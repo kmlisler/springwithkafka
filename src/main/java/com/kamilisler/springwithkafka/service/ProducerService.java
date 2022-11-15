@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
         public void sendMessage(MappedPackage thePackage) {
             kafkaTemplate.send(topicName, thePackage);
+            // template batch yollama araştır.
         }
+
     }
 

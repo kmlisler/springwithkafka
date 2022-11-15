@@ -20,6 +20,7 @@ public class MappedPackage {
         this.leadTime = leadTime;
         this.orderInTime = orderInTime;
     }
+    public MappedPackage(){}
 
     public Long getId() {
         return id;
