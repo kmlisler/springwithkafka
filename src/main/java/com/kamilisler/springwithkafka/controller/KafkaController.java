@@ -24,8 +24,13 @@ public class KafkaController {
     public String sendSinglePackageToKafka(@PathVariable Long packageId) {
 
         MappedPackage myPackage = preparePackageService.getSinglePackage(packageId);
-        this.producer.sendMessage(myPackage);
-        return "Single package is sent. sent package id : " + packageId;
+        if (myPackage != null){
+            this.producer.sendMessage(myPackage);
+            return "Single package is sent. sent package id : " + packageId;
+        }
+        return "Package id is not found : " + packageId;
+
+
     }
     //TODO: sistemdeki MappedPackage'ların hepsini kafkaya gönder
     @GetMapping("/bootstrap")
