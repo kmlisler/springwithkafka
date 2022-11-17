@@ -4,67 +4,87 @@ import com.kamilisler.springwithkafka.entity.Package;
 import com.kamilisler.springwithkafka.model.MappedPackage;
 import com.kamilisler.springwithkafka.repository.PackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
-@EnableJpaRepositories("com.kamilisler.springwithkafka.repository")
 public class PreparePackageService {
     @Autowired
     PackageRepository packageRepository;
 
-    public MappedPackage getSinglePackage(Long id){
+    public MappedPackage getSinglePackage(Long id) {
 
         Optional<Package> thePackage = packageRepository.findById(id);
-        return thePackage.map(this::processPackage).orElse(null);
+        // filter et cancalled'a göre
+        //return thePackage.map(this::processPackage).orElse(null); // or else throw vs.
+
+
         /*
-        if (thePackage.isPresent()){
+         * cancelled package'ların filtrelenmesi burada yapıldı.
+         * çok büyük ölçekli verilerde filtreleme repository'den çekme sırasında yapılsa performans açısından
+         * kullanmayacağımız verileri repository'den çekmemek adına daha iyi olabilirdi fakat bu projede uygulanmadı.
+         *
+         * */
+        if (thePackage.isPresent() && !thePackage.get().getCancelled()) {
+
             return processPackage(thePackage.get());
         }
         return null;
-         */
     }
     public List<MappedPackage> getAllPackages(){
 
         List<Package> allPackages = packageRepository.findAll();
-        List<MappedPackage> mappedPackages = new ArrayList<>();
-        for (Package thePackage : allPackages) {
-            mappedPackages.add(processPackage(thePackage));
-        }
-        return mappedPackages;
+        return allPackages.stream().filter(thePackage -> !thePackage.getCancelled()).map(this::processPackage).collect(Collectors.toList());
     }
 
-
-    public MappedPackage processPackage(Package samplePackage){
+    private MappedPackage processPackage(Package samplePackage) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
         MappedPackage theMappedPackage = new MappedPackage();
-        
+
         theMappedPackage.setId(samplePackage.getId());
+        // we assume that created_at not null
         theMappedPackage.setCreatedAt(dateFormat.format(samplePackage.getCreated_at()));
+        // if created_at not null, last update at has the same value for beggining and not null.
         theMappedPackage.setLastUpdatedAt(dateFormat.format(samplePackage.getLast_updated_at()));
 
-        Integer collectionDuration = calculateDuration(samplePackage.getCreated_at(),samplePackage.getCollected_at());
-        theMappedPackage.setCollectionDuration(collectionDuration);
+        // the package may be just created or cancelled befare collect,so not collected yet.  we do this control because if collected_at null, we get an error.
+        if (Objects.isNull(samplePackage.getCollected())) {
+            theMappedPackage.setCollectionDuration(null);
+        } else {
+            Integer collectionDuration = calculateDuration(samplePackage.getCreated_at(), samplePackage.getCollected_at());
+            theMappedPackage.setCollectionDuration(collectionDuration);
+        }
+        // the package may be cancelled before delivery or not completed yet. in this situation deliveryDuration must be null.
+        if (Objects.isNull(samplePackage.getIn_delivery_at()) || Objects.isNull(samplePackage.getCompleted_at())) {
+            theMappedPackage.setDeliveryDuration(null);
+        } else {
+            Integer deliveryDuration = calculateDuration(samplePackage.getIn_delivery_at(), samplePackage.getCompleted_at());
+            theMappedPackage.setDeliveryDuration(deliveryDuration);
+        }
 
-        Integer deliveryDuration = calculateDuration(samplePackage.getIn_delivery_at(),samplePackage.getCompleted_at());
-        theMappedPackage.setDeliveryDuration(deliveryDuration);
-
+        // eta is not null, static value
         theMappedPackage.setEta(samplePackage.getEta());
+        // the package may be not completed yet or cancelled. this means leadtime is null.
+        // leadtime is null means ve dont complate the package and orderintime must be null.
+        if (Objects.isNull(samplePackage.getCompleted_at())) {
+            theMappedPackage.setLeadTime(null);
+            theMappedPackage.setOrderInTime(null);
+        } else {
+            Integer leadTime = calculateDuration(samplePackage.getCreated_at(), samplePackage.getCompleted_at());
+            theMappedPackage.setLeadTime(leadTime);
+            theMappedPackage.setOrderInTime(leadTime <= theMappedPackage.getEta());
+        }
 
-        Integer leadTime = calculateDuration(samplePackage.getWaiting_for_assignment_at(),samplePackage.getCompleted_at()); // start: created_at olabilir mi ?
-        theMappedPackage.setLeadTime(leadTime);
 
-        theMappedPackage.setOrderInTime(leadTime <= theMappedPackage.getEta());
-        
         return theMappedPackage;
     }
     public Integer calculateDuration(Date startDate,Date endDate){

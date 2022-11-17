@@ -1,51 +1,31 @@
 package com.kamilisler.springwithkafka.controller;
-import com.kamilisler.springwithkafka.entity.Package;
-import com.kamilisler.springwithkafka.model.MappedPackage;
-import com.kamilisler.springwithkafka.service.PreparePackageService;
-import com.kamilisler.springwithkafka.service.ProducerService;
+
+import com.kamilisler.springwithkafka.service.OperatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
 @RequestMapping(value = "/kafka")
+@ControllerAdvice
 public class KafkaController {
 
-    private final ProducerService producer;
     @Autowired
-    private PreparePackageService preparePackageService;
-
-    public KafkaController(ProducerService producer) {
-        this.producer = producer;
-    }
+    private OperatorService operatorService;
 
     @GetMapping("/send/{packageId}")
     public String sendSinglePackageToKafka(@PathVariable Long packageId) {
 
-        MappedPackage myPackage = preparePackageService.getSinglePackage(packageId);
-        if (myPackage != null){
-            this.producer.sendMessage(myPackage);
-            return "Single package is sent. sent package id : " + packageId;
-        }
-        return "Package id is not found : " + packageId;
-
+        return operatorService.sendPackageForKafka(packageId);
 
     }
     @GetMapping("/bootstrap")
     public String sendAllPackagesToKafka() {
-        // this.producer.sendMessage("");
-        List<MappedPackage> list = preparePackageService.getAllPackages();
-        this.producer.sendMessage(list);
-        return "All packages sent to kafka." ;
+
+        return operatorService.bootstrapForKafka();
     }
 
-    @GetMapping("/packages")
-    public List<Package> getAllComments() {
-        //return packageRepository.findAll();
-        return null;
-    }
+
+
 
 
 }

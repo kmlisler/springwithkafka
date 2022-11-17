@@ -6,19 +6,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-    @Service
-    public class ProducerService {
+import java.util.List;
 
-        @Autowired
-        private KafkaTemplate<String, Object> kafkaTemplate;
+@Service
+public class ProducerService {
 
-        @Value("${spring.kafka.producer.topic}")
-        private String topicName;
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
-        public void sendMessage(Object thePackage) {
-            kafkaTemplate.send(topicName, thePackage);
-            // template batch yollama araştır.
-        }
+    @Value("${spring.kafka.producer.topic}")
+    private String topicName;
+
+    public void sendMessage(MappedPackage thePackage) {
+        kafkaTemplate.send(topicName, thePackage);
+    }
+
+    public void sendMessageForBootstrap(List<MappedPackage> thePackages) {
+
+        thePackages.forEach(this::sendMessage);
 
     }
+
+}
 
