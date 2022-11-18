@@ -1,6 +1,6 @@
 # springwithkafka
 
- #### This project is implemented using springboot rest api,mysql and apache kafka. Application has two endpoints, first URI: /kafka/send/{packageId} in order to send single package to kafka with some rules, second URI: /kafka/bootstrap in order to send all packages records(with some rules) in our database. <hr> 
+ #### This project is implemented using springboot rest api,mysql and apache kafka. Application has two endpoints, first URI: /kafka/send/{packageId} in order to get our "Package" datas in our database and convert it "MappedPackage" instance and send single MappedPackage to kafka with some rules, second URI: /kafka/bootstrap in order to get our all "Package" datas in our database and convert them "MappedPackage" instancse and send MappedPackage list to kafka with some rules <hr> 
  <b>used technologies and versions: <br>
  
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white) <b>17 <br>
