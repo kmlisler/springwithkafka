@@ -144,23 +144,35 @@ VALUES (8, 888888, 888888, 888888, 888888, 888888, 'BIG', 180, '2022-11-15', '20
  ![image](https://user-images.githubusercontent.com/82888052/202665233-a9192b89-fd5d-4b74-b2e2-0060a35e7569.png) <br>
  <b> we succesfully send our first package to kafka <br>
  <b> our local consumer is monitoring our kafka: <br>
-  ![image](https://user-images.githubusercontent.com/82888052/202666135-780623a4-e795-4c7d-a644-9d86fa3f350a.png)
+  ![image](https://user-images.githubusercontent.com/82888052/202666135-780623a4-e795-4c7d-a644-9d86fa3f350a.png) <br>
  <b> send another completed package `http://localhost:8081/kafka/send/7`. <br>
  ![image](https://user-images.githubusercontent.com/82888052/202666594-31b192e7-34ce-42f8-8a64-795b4f4aba17.png) <br>
  <b> kafka server: <br>
- ![image](https://user-images.githubusercontent.com/82888052/202666760-717d7a81-3700-4755-b130-edc011b8f14e.png)
+ ![image](https://user-images.githubusercontent.com/82888052/202666760-717d7a81-3700-4755-b130-edc011b8f14e.png) <br>
  <b> send kafka to "IN DELIVERY" package `http://localhost:8081/kafka/send/5`. <br>
  ![image](https://user-images.githubusercontent.com/82888052/202669720-3cf7040e-8657-4708-9332-47a184e3a5e4.png) <br>
- <b> kafka server: <br>
+
  !![image](https://user-images.githubusercontent.com/82888052/202669824-c2ad3065-9ff3-456d-9dc2-363ed6c04842.png)
  
-
  ### we are getting correct MappedPackage values on kafka.
- ### Lets continue with sending "CANCALLED" package.
- 
- ![image](https://user-images.githubusercontent.com/82888052/202668439-a0a26bb8-855f-4413-b65b-2cef52512d04.png)
+ ### Lets continue with sending "CANCALLED" packages and one package that is not in the database.
+ ![image](https://user-images.githubusercontent.com/82888052/202668439-a0a26bb8-855f-4413-b65b-2cef52512d04.png) <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202670217-377067a4-7f6b-423c-bb17-b6c68c1685da.png) <br>
+ nonexist package request: <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202670585-e243d10e-a3bb-453a-bc7b-6156dbaa2541.png) <br>
+> we are getting BADREQUEST Response. <br>
+<b> kafka server: <br>
+![image](https://user-images.githubusercontent.com/82888052/202670641-e9bd2aad-f036-4685-b2c2-7276de607200.png) <br>
+<b> as you can see, server is not changed because we dont send cancelled packages to kafka. 
 
-  
+### Lets try call our "/kafka/bootstrap" URI.
+#### in our current database, there is 3 completed, 1 in delivery, 3 cancelled package. i expect that our application's bootstrap uri send all packages except cancelled ones.
+<br> <b> call bootstrap; <br>
+![image](https://user-images.githubusercontent.com/82888052/202671723-5bc49f8a-acb0-41bc-8a0a-effd4da273b3.png)
+ <b> current kafka server: <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202672157-533b89f4-569c-4149-8f5c-9c87f83dd744.png)
+ #### as you can see, our new 5 non-cancelled packages is converted "MappedPackage" instance and sent to kafa server. The applicaton works properly.
+ 
  
 
   
