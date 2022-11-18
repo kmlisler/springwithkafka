@@ -1,7 +1,9 @@
 # springwithkafka
 
- #### This project is implemented using springboot rest api,mysql and apache kafka. Application has two endpoints, first URI: /kafka/send/{packageId} in order to get our "Package" datas in our database and convert it "MappedPackage" instance and send single MappedPackage to kafka with some rules, second URI: /kafka/bootstrap in order to get our all "Package" datas in our database and convert them "MappedPackage" instancse and send MappedPackage list to kafka with some rules <hr> 
- <b>used technologies and versions: <br>
+ #### This project is implemented using springboot rest api,mysql and apache kafka.
+  Application has two endpoints, first URI: `/kafka/send/{packageId}` in order to get our specified "Package" data in our database and convert it "MappedPackage" instance and send single MappedPackage to kafka with some rules. <br>
+  Second URI: `/kafka/bootstrap` in order to get our all "Package" datas in our database and convert them "MappedPackage" instancse and send all MappedPackages to kafka with some rules <hr> 
+ #### used technologies and versions: <br>
  
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white) <b>17 <br>
 ![Springboot](https://img.shields.io/badge/Spring_Boot-F2F4F9?style=for-the-badge&logo=spring-boot)   <b>2.7.5 <br>
@@ -136,10 +138,10 @@ VALUES (8, 888888, 888888, 888888, 888888, 888888, 'BIG', 180, '2022-11-15', '20
 -- -> teslim edilmiş fakat tahmin edilen süreyi aşmış paket olması gereken kafka çıktısı: "collectionDuration":120,"deliveryDuration":182," "leadTime":334, "orderInTime":false because eta:180
  ```
 #### Our table now contains:
-4 "COMPLETED" packages. (ids of the completed packages: 19604181, 2, 7, 8 )
-1 "IN DELIVERY" package. (id of the in delivery package: 5)
-3 "CANCELLED" packages. (ids of the cancelled packages: 3, 4, 6)
-### Let's run our application and test our URIs.
+4 "COMPLETED" packages. (ids of the completed packages: 19604181, 2, 7, 8 ) <br>
+1 "IN DELIVERY" package. (id of the in delivery package: 5) <br>
+3 "CANCELLED" packages. (ids of the cancelled packages: 3, 4, 6) <br>
+### Let's run our application and test our URIs. <br>
  > Kafka Broker, Zookeeper and our shcaselasttest topic is running at my local on the background. applications.yaml topic name is set to current topic. <br>
  ![image](https://user-images.githubusercontent.com/82888052/202665233-a9192b89-fd5d-4b74-b2e2-0060a35e7569.png) <br>
  <b> we succesfully send our first package to kafka <br>
