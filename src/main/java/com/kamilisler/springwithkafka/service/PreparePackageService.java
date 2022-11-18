@@ -63,6 +63,18 @@ public class PreparePackageService {
             Integer collectionDuration = calculateDuration(samplePackage.getCreated_at(), samplePackage.getCollected_at());
             theMappedPackage.setCollectionDuration(collectionDuration);
         }
+
+        // the package may be not completed yet or cancelled. this means leadtime is null.
+        // leadtime is null means our package is cancelled or not completed, orderintime must be null too because i dont know if this will be completed or not.
+        if (Objects.isNull(samplePackage.getCompleted_at())) {
+            theMappedPackage.setLeadTime(null);
+            theMappedPackage.setOrderInTime(null);
+        } else {
+            Integer leadTime = calculateDuration(samplePackage.getCreated_at(), samplePackage.getCompleted_at());
+            theMappedPackage.setLeadTime(leadTime);
+            theMappedPackage.setOrderInTime(leadTime <= theMappedPackage.getEta());
+        }
+
         // the package may be cancelled before delivery or not completed yet. in this situation deliveryDuration must be null.
         if (Objects.isNull(samplePackage.getIn_delivery_at()) || Objects.isNull(samplePackage.getCompleted_at())) {
             theMappedPackage.setDeliveryDuration(null);
@@ -73,16 +85,6 @@ public class PreparePackageService {
 
         // eta is not null, static value
         theMappedPackage.setEta(samplePackage.getEta());
-        // the package may be not completed yet or cancelled. this means leadtime is null.
-        // leadtime is null means our package is not complated or cancelled, orderintime must be null too because i dont know if this will be completed or not.
-        if (Objects.isNull(samplePackage.getCompleted_at())) {
-            theMappedPackage.setLeadTime(null);
-            theMappedPackage.setOrderInTime(null);
-        } else {
-            Integer leadTime = calculateDuration(samplePackage.getCreated_at(), samplePackage.getCompleted_at());
-            theMappedPackage.setLeadTime(leadTime);
-            theMappedPackage.setOrderInTime(leadTime <= theMappedPackage.getEta());
-        }
 
 
         return theMappedPackage;
