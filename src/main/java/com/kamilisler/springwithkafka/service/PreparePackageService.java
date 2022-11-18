@@ -72,7 +72,7 @@ public class PreparePackageService {
         } else {
             Integer leadTime = calculateDuration(samplePackage.getCreated_at(), samplePackage.getCompleted_at());
             theMappedPackage.setLeadTime(leadTime);
-            theMappedPackage.setOrderInTime(leadTime <= theMappedPackage.getEta());
+            theMappedPackage.setOrderInTime(leadTime <= samplePackage.getEta());
         }
 
         // the package may be cancelled before delivery or not completed yet. in this situation deliveryDuration must be null.
