@@ -21,7 +21,7 @@ public class OperatorService {
             this.producerService.sendMessage(myPackage);
             return "Single package is sent to kafka . Sent package id : " + packageId;
         }
-        return "Package id is not found : " + packageId;
+        return "Package id is not found or package is cancelled: " + packageId;
     }
 
     public String bootstrapForKafka() {

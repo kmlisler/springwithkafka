@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -39,7 +36,8 @@ public class PreparePackageService {
         }
         return null;
     }
-    public List<MappedPackage> getAllPackages(){
+
+    public List<MappedPackage> getAllPackages() {
 
         List<Package> allPackages = packageRepository.findAll();
         return allPackages.stream().filter(thePackage -> !thePackage.getCancelled()).map(this::processPackage).collect(Collectors.toList());
@@ -47,16 +45,18 @@ public class PreparePackageService {
 
     private MappedPackage processPackage(Package samplePackage) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+        // i changed timezone to UTC because regular SimpleDateFormat adding our DATE +3 hour
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         MappedPackage theMappedPackage = new MappedPackage();
 
         theMappedPackage.setId(samplePackage.getId());
-        // we assume that created_at not null
+        // i must assume that created_at not null
         theMappedPackage.setCreatedAt(dateFormat.format(samplePackage.getCreated_at()));
-        // if created_at not null, last update at has the same value for beggining and not null.
+        // if created_at not null, last update at will the same value in beggining and it cant be null.
         theMappedPackage.setLastUpdatedAt(dateFormat.format(samplePackage.getLast_updated_at()));
 
-        // the package may be just created or cancelled befare collect,so not collected yet.  we do this control because if collected_at null, we get an error.
+        // the package may be just created or cancelled befare collect,so not collected yet.  i do this control because if collected_at null, i get an error in calculateDuration function.
         if (Objects.isNull(samplePackage.getCollected())) {
             theMappedPackage.setCollectionDuration(null);
         } else {
@@ -74,7 +74,7 @@ public class PreparePackageService {
         // eta is not null, static value
         theMappedPackage.setEta(samplePackage.getEta());
         // the package may be not completed yet or cancelled. this means leadtime is null.
-        // leadtime is null means ve dont complate the package and orderintime must be null.
+        // leadtime is null means our package is not complated or cancelled, orderintime must be null too because i dont know if this will be completed or not.
         if (Objects.isNull(samplePackage.getCompleted_at())) {
             theMappedPackage.setLeadTime(null);
             theMappedPackage.setOrderInTime(null);
@@ -87,11 +87,11 @@ public class PreparePackageService {
 
         return theMappedPackage;
     }
-    public Integer calculateDuration(Date startDate,Date endDate){
+
+    public Integer calculateDuration(Date startDate, Date endDate) {
         long diff = endDate.getTime() - startDate.getTime();
         long result = TimeUnit.MILLISECONDS.toMinutes(diff);
-
-        return (int)result;
+        return (int) result;
     }
 
 
