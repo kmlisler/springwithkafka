@@ -4,8 +4,9 @@
  <b>used technologies and versions: <br>
  
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white) <b>17 <br>
- ![image](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)   <b>8.0.30 <br>
- ![image](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white)   <b>3.3.1 <br>
+![Springboot](https://img.shields.io/badge/Spring_Boot-F2F4F9?style=for-the-badge&logo=spring-boot)   <b>2.7.5 <br>
+![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)   <b>8.0.30 <br>
+![image](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white)   <b>3.3.1 <br>
  my application.yaml file for connect mysql and local kafka config
  ```
  spring:
@@ -14,7 +15,7 @@
   kafka:
     bootstrap-servers: localhost:9092
     producer:
-      topic: shcasetest
+      topic: shcaselasttest
   datasource:
     password: 7asbaw2sqn
     username: root
@@ -24,7 +25,7 @@
 server:
   port: 8081
   ```
-
+> NOTE: MySql and Apache Kafka configs must be made according to your local settings.
  ## Installing / Getting started
  Download Apache Kafka 2.12-3.3.1 at [Apache Kafka Download](https://kafka.apache.org/downloads).
  #### set server directory
@@ -70,8 +71,100 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
  > example in my local <br>
 ![image](https://user-images.githubusercontent.com/82888052/202650928-870004be-1d9a-459f-b5e5-98c324bcca4d.png)
 
- ### now, create a local Consumer in same cmd screen in order to monitor the packages we send from the application.
+ ### now, create a local Consumer in same cmd screen in order to monitor the packages we send from the application. ( for MACOS change ".bat" to ".sh" and use directly \bin file, not \bin\windows )
 
 ```shell
-kafka-console-consumer.bat --topic shcasetest --from-beginning --bootstrap-server localhost:9092 
+kafka-console-consumer.bat --topic shcaselasttest --from-beginning --bootstrap-server localhost:9092 
 ```
+ ### we all set up apache kafka installation, Kafka Broker/Zookeeper is running and we also created our topic named "shcaselasttest" to test app <hr>
+ ## Now lets see how our applicaton work
+ <b> in order to test our application, we create our "Package" table.
+```shell
+CREATE TABLE `package_directory`.`package` (
+  `id` long NOT NULL,
+  `order_id` long NOT NULL,
+  `user_id` long NOT NULL,
+  `customer_id` long NOT NULL,
+  `store_id` long NOT NULL,
+  `origin_address_id` long NOT NULL,
+  `type` varchar(255),
+  `eta` int NOT NULL,
+  `delivery_date` date,
+  `created_at` TIMESTAMP(6) NOT NULL,  -- i change 'datetime' to  'TIMESTAMP(6)' because regular datetime is rounding our date, i want "yyyy-MM-dd HH:mm:ss.SSSSSS" format for date.
+  `waiting_for_assignment_at` TIMESTAMP(6),
+  `collected_at` TIMESTAMP(6),
+  `arrival_for_pickup_at` TIMESTAMP(6),
+  `picked_up_at` TIMESTAMP(6),
+  `in_delivery_at` TIMESTAMP(6),
+  `arrival_for_delivery_at` TIMESTAMP(6),
+  `completed_at` TIMESTAMP(6),
+  `last_updated_at` TIMESTAMP(6) NOT NULL,
+  `cancelled_at` TIMESTAMP(6),
+  `collected` bool,
+  `cancelled` bool,
+  `reassigned` bool,
+  `cancel_reason` varchar(255),
+  `status` varchar(255),
+  PRIMARY KEY (`id`(255))
+); 
+ ```
+<b> and we insert some meaningful data to our table, below the values, expected kafka records and package properties written
+ ```shell
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (19604181, 123972783, 50002010395213, 20002011575015, 20000000004103, 999000020443388, 'REGULAR', 277, '2021-11-13', '2021-11-13 10:47:52.675248', '2021-11-13 10:47:52.675248', '2021-11-13 10:47:52.828692', '2021-11-13 10:48:37.032078', '2021-11-13 10:49:50.278087', '2021-11-13 11:05:56.861614', '2021-11-13 11:05:58.045640', '2021-11-13 11:40:15.314340', '2021-11-13 11:40:15.314340', null, 1, null, 0, 'COMPLETED', null);
+-- -> sample, zamanında tamamlanmış bir paket. olması gereken kafka çıktısı: collectionDuration: 0 çünkü saliseler içinde toplanmış."deliveryDuration":34, "leadTime":52, "orderInTime":true because eta:277
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (2, 222222, 222222, 222222, 222222, 222222, 'BIG', 140, '2022-11-15', '2022-11-15 07:47:52.675248', '2022-11-15 07:47:52.675248', '2022-11-15 10:57:52.828692', '2022-11-15 11:00:37.032078', '2022-11-15 11:05:50.278087', '2022-11-15 11:15:56.861614', '2022-11-15 11:16:58.045640', '2022-11-15 14:40:15.314340', '2022-11-15 11:40:15.314340', null, 1, null, 0, 'COMPLETED', null);
+-- -> estimated timeı geçmiş ve tamamlanmış bir paket. olması gereken kafka çıktısı: "collectionDuration":190,"deliveryDuration":204," "leadTime":412, "orderInTime":false because eta:140
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (3, 333333, 333333, 333333, 333333, 333333, 'SMALL', 70, '2022-11-15', '2022-11-15 08:47:52.675248', '2022-11-15 08:47:52.675248', '2022-11-15 08:57:52.828692', null, null, null, null, null, '2022-11-15 08:58:52.828692', '2022-11-15 08:58:52.828692', 1, 'yanlış sipariş', 1, 'CANCELLED', null);
+-- -> toplanmış(collected: 1 ), toplandıktan sonra cancel edilmiş paket. cancel edildiği için kafkaya gönderilmeyecek.
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (4, 444444, 444444, 444444, 444444, 444444, 'BIG', 120, '2022-11-15', '2022-11-15 10:30:00.000000', '2022-11-15 10:30:00.000000', '2022-11-15 11:05:00.000000', '2022-11-15 11:10:00.000000', '2022-11-15 11:12:00.000000', '2022-11-15 11:20:00.000000', '2022-11-15 11:25:00.000000', null, '2022-11-15 11:30:00.000000', '2022-11-15 11:30:00.000000', 1, 'vazgeçtim', 1, 'CANCELLED', null);
+-- -> toplanmış(collected: 1 ), yola çıkmış, yola çıktıktan sonra cancel edilmiş paket. cancel edildiği için kafkaya gönderilemeyecek
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (5, 555555, 555555, 555555, 555555, 555555, 'REGULAR', 90, '2022-11-15', '2022-11-15 10:45:12.758476', '2022-11-15 10:45:12.758476', '2022-11-15 10:55:12.758476', '2022-11-15 10:57:12.758476', '2022-11-15 10:58:12.758476', '2022-11-15 11:00:12.758476', '2022-11-15 11:05:12.758476', null, '2022-11-15 11:05:12.758476', null, 1, null, 0, 'IN DELIVERY', null);
+-- -> toplanmış(collected: 1 ), yola çıkmış, hala yolda olan paket.olması gereken kafka çıktısı: "collectionDuration":10,"deliveryDuration":null," "leadTime":null, "orderInTime":null because not completed
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (6, 666666, 666666, 666666, 666666, 666666, 'SMALL', 50, '2022-11-15', '2022-11-15 10:50:12.758476', '2022-11-15 10:50:12.758476', null, null, null, null, null, null, '2022-11-15 10:55:12.758476', '2022-11-15 10:55:12.758476', 0, 'hatalı seçim', 1, 'CANCELLED', null);
+-- -> toplanma bitmeden iptal edilmiş paket. cancel edilmiş paket, kafkaya gitmez.
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (7, 777777, 777777, 777777, 777777, 777777, 'REGULAR', 130, '2022-11-15', '2022-11-15 10:50:12.758476', '2022-11-15 10:50:12.758476', '2022-11-15 10:55:12.758476', '2022-11-15 11:00:12.758476', '2022-11-15 11:05:12.758476', '2022-11-15 11:10:12.758476', '2022-11-15 11:15:12.758476', '2022-11-15 11:30:12.758476', '2022-11-15 11:30:12.758476', null, 1, null, 0, 'COMPLETED', 1);
+-- -> sağlıklı bi şekilde vaktinde teslim edilmiş paket. olması gereken kafka çıktısı: "collectionDuration":5,"deliveryDuration":20," "leadTime":40, "orderInTime":true because eta:130
+INSERT INTO package(`id`, `order_id`, `user_id`, `customer_id`, `store_id`, `origin_address_id`, `type`, `eta`, `delivery_date`, `created_at`, `waiting_for_assignment_at`, `collected_at`, `arrival_for_pickup_at`, `picked_up_at`, `in_delivery_at`, `arrival_for_delivery_at`, `completed_at`, `last_updated_at`, `cancelled_at`, `collected`, `cancel_reason`, `cancelled`, `status`, `reassigned`)
+VALUES (8, 888888, 888888, 888888, 888888, 888888, 'BIG', 180, '2022-11-15', '2022-11-15 07:00:00.123456', '2022-11-15 07:00:00.123456', '2022-11-15 09:00:00.123456', '2022-11-15 09:10:00.123456', '2022-11-15 09:20:00.123456', '2022-11-15 09:32:00.123456', '2022-11-15 09:35:00.000000', '2022-11-15 12:35:00.000000', '2022-11-15 12:35:00.000000', null, 1, null, 0, 'COMPLETED', 0);
+-- -> teslim edilmiş fakat tahmin edilen süreyi aşmış paket olması gereken kafka çıktısı: "collectionDuration":120,"deliveryDuration":182," "leadTime":334, "orderInTime":false because eta:180
+ ```
+#### Our table now contains:
+4 "COMPLETED" packages. (ids of the completed packages: 19604181, 2, 7, 8 )
+1 "IN DELIVERY" package. (id of the in delivery package: 5)
+3 "CANCELLED" packages. (ids of the cancelled packages: 3, 4, 6)
+### Let's run our application and test our URIs.
+ > Kafka Broker, Zookeeper and our shcaselasttest topic is running at my local on the background. applications.yaml topic name is set to current topic. <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202665233-a9192b89-fd5d-4b74-b2e2-0060a35e7569.png) <br>
+ <b> we succesfully send our first package to kafka <br>
+ <b> our local consumer is monitoring our kafka: <br>
+  ![image](https://user-images.githubusercontent.com/82888052/202666135-780623a4-e795-4c7d-a644-9d86fa3f350a.png)
+ <b> send another completed package `http://localhost:8081/kafka/send/7`. <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202666594-31b192e7-34ce-42f8-8a64-795b4f4aba17.png) <br>
+ <b> kafka server: <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202666760-717d7a81-3700-4755-b130-edc011b8f14e.png)
+ <b> send kafka to "IN DELIVERY" package `http://localhost:8081/kafka/send/5`. <br>
+ ![image](https://user-images.githubusercontent.com/82888052/202669720-3cf7040e-8657-4708-9332-47a184e3a5e4.png) <br>
+ <b> kafka server: <br>
+ !![image](https://user-images.githubusercontent.com/82888052/202669824-c2ad3065-9ff3-456d-9dc2-363ed6c04842.png)
+ 
+
+ ### we are getting correct MappedPackage values on kafka.
+ ### Lets continue with sending "CANCALLED" package.
+ 
+ ![image](https://user-images.githubusercontent.com/82888052/202668439-a0a26bb8-855f-4413-b65b-2cef52512d04.png)
+
+  
+ 
+
+  
+
+                              
+ 
+
