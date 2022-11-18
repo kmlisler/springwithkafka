@@ -67,8 +67,8 @@ kafka-topics.bat --list --bootstrap-server localhost:9092
 ```shell
 kafka-topics.sh --list --bootstrap-server localhost:9092  
 ```
- > example in my local
- ![image](https://user-images.githubusercontent.com/82888052/202650928-870004be-1d9a-459f-b5e5-98c324bcca4d.png)
+ > example in my local <br>
+![image](https://user-images.githubusercontent.com/82888052/202650928-870004be-1d9a-459f-b5e5-98c324bcca4d.png)
 
  ### now, create a local Consumer in same cmd screen in order to monitor the packages we send from the application.
 
