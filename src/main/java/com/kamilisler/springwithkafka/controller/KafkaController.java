@@ -2,6 +2,7 @@ package com.kamilisler.springwithkafka.controller;
 
 import com.kamilisler.springwithkafka.service.OperatorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,19 +14,16 @@ public class KafkaController {
     private OperatorService operatorService;
 
     @GetMapping("/send/{packageId}")
-    public String sendSinglePackageToKafka(@PathVariable Long packageId) {
+    public ResponseEntity<String> sendSinglePackageToKafka(@PathVariable Long packageId) {
 
         return operatorService.sendPackageForKafka(packageId);
-
     }
+
     @GetMapping("/bootstrap")
-    public String sendAllPackagesToKafka() {
+    public ResponseEntity<String> sendAllPackagesToKafka() {
 
         return operatorService.bootstrapForKafka();
     }
-
-
-
 
 
 }

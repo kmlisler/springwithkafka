@@ -4,7 +4,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     producer:
-      topic: shcasetest1
+      topic: shcasetest
   datasource:
     password: 7asbaw2sqn
     username: root
