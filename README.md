@@ -45,7 +45,7 @@ server:
 .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties 
 ```
 ### create kafka topic
-go to kafka directory -> bin file and run cmd.exe !! if you are using windows, you should run cmd in windows file
+go to kafka directory -> bin file and run cmd.exe !! if you are using windows, you should run cmd.exe in windows file
 [ i.e: in my local `D:\ApacheKafka\kafka_2.12-3.3.1\bin\windows>`  ]
 #### run this code in bin file,
 ```shell
@@ -55,4 +55,8 @@ kafka-topics.bat --create --topic shcasetest    --bootstrap-server localhost:909
 ```shell
 kafka-topics.sh --create --topic shcasetest    --bootstrap-server localhost:9092 
 ```
-
+### for list our topics:
+```shell
+kafka-topics.bat --list --bootstrap-server localhost:9092 
+```
+ ### now, create a local Consumer in bin file in order to monitor the packages we send from the application.
